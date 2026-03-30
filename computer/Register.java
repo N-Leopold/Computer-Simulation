@@ -35,6 +35,11 @@ public class Register
         return registerData;
     }
 
+    public boolean[] getRegister()
+    {
+        return getRegister(this.size);
+    }
+
     public void loadRegister(boolean[] data)
     {
         int inputIterator = data.length - 1;
