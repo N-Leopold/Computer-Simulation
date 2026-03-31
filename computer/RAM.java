@@ -48,20 +48,17 @@ public class RAM
         }
         else
         {
-            System.out.println("got here");
             int bitPos = 0;
             int bytePos = bits2Int(location);
             boolean[] bite = new boolean[8];
             for(int step = 0; step < bits.length; step++)
             {
                 bite[bitPos] = bits[step];
-                System.out.print(bite[bitPos]);
                 bitPos++;
                 if(bitPos == 8)
                 {
                     bitPos = 0;
                     ram[bytePos].set(bite);
-                    System.out.println("\n" + ram[bytePos]);
                     bytePos++;
                 }
             }
@@ -85,10 +82,19 @@ public class RAM
 
     public String toString()
     {
+        int countBlock = 0;
         String returnable = "~~~ RAM ~~~\n";
+        String binary = "";
         for(ByteBlock block : ram)
         {
-            returnable += block + "\n";
+            returnable += block.toHex() + " ";
+            binary += block + " ";
+            countBlock++;
+            if(countBlock % 4 == 0)
+            {
+                returnable += " ->  " + binary + "\n";
+                binary = "";
+            }
         }
         returnable += "~~~ End RAM ~~~";
         return returnable;
