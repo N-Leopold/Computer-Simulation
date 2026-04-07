@@ -2,9 +2,9 @@ package computer;
 
 public class Register
 {
-    private int size;
-    private String name;
-    private MemoryCell[] data;
+    private int size; // number of bits held by the register
+    private String name; // name for the register, for dev
+    private MemoryCell[] data; // array of memory cells
 
     public Register(int length, String name)
     {
@@ -22,22 +22,20 @@ public class Register
         this(length, "Undefined Register");
     }
 
-    public boolean[] getRegister(int numCells)
+    public boolean[] getRegister(int start, int length)
     {
-        int length = Math.min(numCells, size);
-        int holdSize = size - 1;
-        boolean[] registerData = new boolean[length];
-        for(int step = length-1; step >= 0; step--)
+        int actualLength = Math.min(length, size-start);
+        boolean[] registerData = new boolean[actualLength];
+        for(int step = 0; step < actualLength; step++)
         {
-            registerData[step] = this.data[holdSize].getValue();
-            holdSize--;
+            registerData[step] = this.data[start++].getValue();
         }
         return registerData;
     }
 
     public boolean[] getRegister()
     {
-        return getRegister(this.size);
+        return getRegister(0, this.size);
     }
 
     public void loadRegister(boolean[] data)

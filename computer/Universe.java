@@ -9,6 +9,7 @@ public class Universe
         //ram.load(new boolean[]{false}, new boolean[]{false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, true, false, true, true, true, true, false, false, true, false, false, true, false});
         ram.load(new boolean[]{false}, Universe.hex2MachineCode("3000D792"));
         System.out.println(ram);
+
         /*ram.load(new boolean[]{false}, new boolean[]{true, false, false, true, true, true, true, false, false, false, false, false, false, false, true, false});
         System.out.println(ram);
 

@@ -5,20 +5,27 @@ import java.util.TimerTask;
 
 public class CPU
 {
+    // native to the CPU
     private Register[] registers;
     private Register instructReg;
     private Register programCounter;
+
+    // out-of-universe neccesities
     private Timer clock;
-    int cycle;
+
+    // connection to RAM
     private RAM ram;
 
     public CPU(int numRegs, RAM ram)
     {
+        // instruction register 10 bytes long
         instructReg = new Register(80, "Instruction Register");
+
+        // program counter set to look at the beginning of RAM
         programCounter = new Register(8, "Program Counter");
         programCounter.loadRegister(new boolean[]{false});
 
-        // multipurpose registers
+        // multipurpose registers set at 8 bytes
         registers = new Register[numRegs];
         for(int step = 0; step < numRegs; step++)
         {
@@ -27,60 +34,38 @@ public class CPU
 
         this.ram = ram;
 
-        cycle = 0;
+        // set a clock and run it
         clock = new Timer();
         clock.scheduleAtFixedRate(new TimerTask()
         {
             public void run()
             {
-                switch(cycle)
-                {
-                    case 0: fetch(); break;
-                    case 1: decode(); break;
-                    case 2: execute(); break;
-                    case 3: writeBack(); break;
-                }
-                cycle++;
-                cycle = cycle%4;
+                execute();
             }
         }, 0, 5000);
     }
 
-    private void fetch()
+    private void execute()
     {
-        System.out.println("Fetching");
+        // fetch
         instructReg.loadRegister(ram.fetch(programCounter.getRegister(), 10));
-        System.out.println(instructReg);
-    }
 
-    private void decode()
-    {
-        ByteBlock bite = new ByteBlock(Arrays.copyOfRange(instructReg.getRegister(), 0, 8));
-        switch(bite.toNibble(true))
+        // check the first nibble of the register for main function
+        switch(Wire.toHex(instructReg.getRegister(0,4)))
         {
             case "0": clock.cancel(); System.out.println("CPU has been killed"); break;
-            case "3": handleExtensiveMove(bite); for(int step = 0; step < 10; step++){programCounter.increment();}
+            case "3": handleExtensiveMove(); for(int step = 0; step < 10; step++){programCounter.increment();}
         }
         System.out.println(registers[0]);
     }
 
-    private void execute()
-    {
-
-    }
-
-    private void writeBack()
-    {
-
-    }
-
-    private void handleExtensiveMove(ByteBlock bite)
+    private void handleExtensiveMove()
     {
         ByteBlock regBite = new ByteBlock(Arrays.copyOfRange(instructReg.getRegister(), 8, 16));
         boolean[] valueBite = Arrays.copyOfRange(instructReg.getRegister(), 16, 80);
-        switch(bite.toNibble(false))
+        switch(Wire.toHex(instructReg.getRegister(4,4)))
         {
-            case "0": registers[ram.bits2Int(regBite.fetchNibble(false))].loadRegister(valueBite); // put this value in the register
+            case "0": registers[Wire.bits2Int(regBite.fetchNibble(false))].loadRegister(valueBite); // put this value in the register
         }
     }
 }
