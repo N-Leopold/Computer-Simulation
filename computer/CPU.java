@@ -61,11 +61,10 @@ public class CPU
 
     private void handleExtensiveMove()
     {
-        ByteBlock regBite = new ByteBlock(Arrays.copyOfRange(instructReg.getRegister(), 8, 16));
-        boolean[] valueBite = Arrays.copyOfRange(instructReg.getRegister(), 16, 80);
+        boolean[] valueBite = instructReg.getRegister(16,64);
         switch(Wire.toHex(instructReg.getRegister(4,4)))
         {
-            case "0": registers[Wire.bits2Int(regBite.fetchNibble(false))].loadRegister(valueBite); // put this value in the register
+            case "0": registers[Wire.bits2Int(instructReg.getRegister(12,4))].loadRegister(valueBite); // put this value in the register
         }
     }
 }
