@@ -33,6 +33,11 @@ public class Register
         return registerData;
     }
 
+    public boolean[] getRegister(int length)
+    {
+        return getRegister(this.size - length, length);
+    }
+
     public boolean[] getRegister()
     {
         return getRegister(0, this.size);
@@ -51,14 +56,17 @@ public class Register
         }
     }
 
-    public void increment()
+    public void increment(int count)
     {
-        carry: for(int step = size - 1; step >= 0; step--)
+        for(int increment = 0; increment < count; increment++)
         {
-            data[step].setNot();
-            if(data[step].getValue())
+            carry: for(int step = size - 1; step >= 0; step--)
             {
-                break carry;
+                data[step].setNot();
+                if(data[step].getValue())
+                {
+                    break carry;
+                }
             }
         }
     }
@@ -82,6 +90,7 @@ public class Register
         {
             toReturn += cell;
         }
+        toReturn += " (" + Wire.toHex(getRegister()) + ")";
         return toReturn;
     }
 }

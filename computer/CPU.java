@@ -14,15 +14,16 @@ public class CPU
     private Timer clock;
 
     // connection to RAM
-    private RAM ram;
+    private MMU mmu;
 
-    public CPU(int numRegs, RAM ram)
+    public CPU(int numRegs, MMU mmu)
     {
         // instruction register 10 bytes long
         instructReg = new Register(80, "Instruction Register");
-
-        // program counter set to look at the beginning of RAM
-        programCounter = new Register(8, "Program Counter");
+        
+        // program counter tracks where in a program we are
+        programCounter = new Register(16, "Program Counter");
+        // TODO: this should not be manual
         programCounter.loadRegister(new boolean[]{false});
 
         // multipurpose registers set at 8 bytes
@@ -32,7 +33,7 @@ public class CPU
             registers[step] = new Register(64, "r" + step);
         }
 
-        this.ram = ram;
+        this.mmu = mmu;
 
         // set a clock and run it
         clock = new Timer();
@@ -47,24 +48,39 @@ public class CPU
 
     private void execute()
     {
+        
         // fetch
-        instructReg.loadRegister(ram.fetch(programCounter.getRegister(), 10));
+        instructReg.loadRegister(mmu.fetch(programCounter.getRegister(), 10));
 
         // check the first nibble of the register for main function
         switch(Wire.toHex(instructReg.getRegister(0,4)))
         {
             case "0": clock.cancel(); System.out.println("CPU has been killed"); break;
-            case "3": handleExtensiveMove(); for(int step = 0; step < 10; step++){programCounter.increment();}
+            case "1": handleMoves();break;
         }
+        
+        System.out.println(programCounter);
+        System.out.println(instructReg);
         System.out.println(registers[0]);
+        System.out.println(registers[1]);
     }
 
-    private void handleExtensiveMove()
+    private void handleMoves()
     {
-        boolean[] valueBite = instructReg.getRegister(16,64);
+        // boolean[] valueBite = instructReg.getRegister(16,64);
+
+        // 1# xy ## (##)
+        int numBytesX = Wire.bits2Int(instructReg.getRegister(8,4));
+        int regPosY = Wire.bits2Int(instructReg.getRegister(12,4));
+
         switch(Wire.toHex(instructReg.getRegister(4,4)))
         {
-            case "0": registers[Wire.bits2Int(instructReg.getRegister(12,4))].loadRegister(valueBite); // put this value in the register
+            // case "0": registers[Wire.bits2Int(instructReg.getRegister(12,4))].loadRegister(valueBite); // put this value in the register
+            // MOV reg -> reg
+            case "0": registers[Wire.bits2Int(instructReg.getRegister(20,4))].loadRegister(registers[regPosY].getRegister(numBytesX*8)); programCounter.increment(3); break;
+            // STO reg -> RAM
+            case "1": mmu.load(registers[Wire.bits2Int(instructReg.getRegister(20,4))].getRegister(numBytesX*8),registers[regPosY].getRegister(numBytesX*8)); programCounter.increment(3); break;
+            case "4": registers[regPosY].loadRegister(mmu.fetch(instructReg.getRegister(16,16),numBytesX));programCounter.increment(4);break;
         }
     }
 }

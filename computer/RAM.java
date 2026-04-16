@@ -21,24 +21,21 @@ public class RAM
      * @param length number of bytes to pull
      * @return
      */
-    public boolean[] fetch(boolean[] location, int length)
+    public boolean[] fetch(int location, int length)
     {
         boolean[] bits = new boolean[length*8];
-        int startLoc = Wire.bits2Int(location);
         for(int step = 0; step < length*8; step++)
         {
-           bits[step] = this.ram[startLoc + step].getValue();
+           bits[step] = this.ram[location*8 + step].getValue();
         }
         return bits;
     }
 
-    public void load(boolean[] location, boolean[] bits)
+    public void load(int location, boolean[] bits)
     {
-        int startLoc = Wire.bits2Int(location);
-        // TODO: handle when we attempt to write outside the "physical" memory
         for(int step = 0; step < bits.length; step++)
         {
-            ram[startLoc + step].setValue(bits[step]);
+            ram[location*8 + step].setValue(bits[step]);
         }
     }
 
